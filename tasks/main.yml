@@ -1,0 +1,36 @@
+---
+- name: detect if {{swapfile_path}} is device parition
+  stat: path={{swapfile_path}}
+  register: st
+
+- name: Disable swap
+  command: swapoff -a
+
+- block:
+    - name: Ensure swap file is removed
+      file:
+        path: "{{swapfile_path}}"
+        state: absent
+    - name: Create Swap File
+      command: "fallocate -l {{swapfile_size}} {{swapfile_path}}"
+    - name: Ensure swap has right permission
+      file:
+        path: "{{swapfile_path}}"
+        state: file
+        owner: root
+        group: root
+        mode: 0600
+  when: ( not st.stat.exists ) or ( st.stat.exists and not st.stat.isblk )
+
+- name: Make swap file
+  command: mkswap {{swapfile_path}}
+
+- name: Activate swap file
+  command: swapon {{swapfile_path}}
+
+- name: Adjust fstab file to enable swap file on boot
+  lineinfile:
+    dest: /etc/fstab
+    line: '{{swapfile_path}} none swap defaults 0 0'
+    state: present
+...
