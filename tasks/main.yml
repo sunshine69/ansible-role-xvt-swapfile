@@ -11,8 +11,10 @@
       file:
         path: "{{swapfile_path}}"
         state: absent
+
     - name: Create Swap File
-      command: "fallocate -l {{swapfile_size}} {{swapfile_path}}"
+      command: "dd if=/dev/zero of={{swapfile_path}} bs=1M count={{swapfile_size_mb}}"
+
     - name: Ensure swap has right permission
       file:
         path: "{{swapfile_path}}"
@@ -29,8 +31,9 @@
   command: swapon {{swapfile_path}}
 
 - name: Adjust fstab file to enable swap file on boot
-  lineinfile:
-    dest: /etc/fstab
-    line: '{{swapfile_path}} none swap defaults 0 0'
+  mount:
+    state: mounted
+    src: "{{ swapfile_path }}"
+    name: swap
+    fstype: swap
     state: present
-...

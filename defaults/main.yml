@@ -1,4 +1,4 @@
 ---
-swapfile_size: "2048M"
+swapfile_size_mb: "2048"
 swapfile_path: "/swap"
 ...
