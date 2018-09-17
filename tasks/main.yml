@@ -32,7 +32,6 @@
 
 - name: Adjust fstab file to enable swap file on boot
   mount:
-    state: mounted
     src: "{{ swapfile_path }}"
     name: swap
     fstype: swap
